@@ -22,7 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
             <nav className="site-nav">
               <Link href="/">Home</Link>
-              <Link href="/rss.xml">RSS</Link>
             </nav>
           </header>
 
@@ -30,7 +29,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           <footer className="site-footer">
             <span>&copy; {new Date().getFullYear()} Stack the Days</span>
-            <a href="/rss.xml">RSS feed</a>
           </footer>
         </div>
       </body>
