@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
@@ -21,6 +21,7 @@ export default function EditPostPage() {
   const [draft, setDraft] = useState(true);
   const [content, setContent] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "error">("idle");
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
     if (!supabase) {
@@ -39,7 +40,8 @@ export default function EditPostPage() {
   }, [session, router]);
 
   useEffect(() => {
-    if (!supabase || !session) return;
+    if (!supabase || !session || fetchedRef.current) return;
+    fetchedRef.current = true;
     supabase
       .from("posts")
       .select("title, date, excerpt, tags, draft, content")
