@@ -82,6 +82,7 @@ export default function NewPostPage() {
     } else {
       router.push(`/posts/${slug}`);
     }
+    router.refresh();
   }
 
   if (!isSupabaseConfigured) {

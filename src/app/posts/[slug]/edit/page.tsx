@@ -89,6 +89,7 @@ export default function EditPostPage() {
     }
 
     router.push(draft ? "/manage" : `/posts/${slug}`);
+    router.refresh();
   }
 
   if (!isSupabaseConfigured) {
