@@ -98,6 +98,22 @@ export default function EditPostPage() {
     router.refresh();
   }
 
+  async function handleDelete() {
+    if (!supabase) return;
+    if (!window.confirm("Delete this post? This can't be undone.")) return;
+
+    setStatus("sending");
+    const { error } = await supabase.from("posts").delete().eq("slug", slug);
+
+    if (error) {
+      setStatus("error");
+      return;
+    }
+
+    router.push("/manage");
+    router.refresh();
+  }
+
   if (!isSupabaseConfigured) {
     return (
       <main>
@@ -167,9 +183,14 @@ export default function EditPostPage() {
           onChange={(e) => setContent(e.target.value)}
           required
         />
-        <button type="submit" disabled={status === "sending"}>
-          {status === "sending" ? "Saving..." : "Save changes"}
-        </button>
+        <div className="admin-form-actions">
+          <button type="submit" disabled={status === "sending"}>
+            {status === "sending" ? "Saving..." : "Save changes"}
+          </button>
+          <button type="button" className="delete-link" onClick={handleDelete} disabled={status === "sending"}>
+            Delete post
+          </button>
+        </div>
         {status === "error" && <p className="comment-note">Something went wrong — try again in a moment.</p>}
       </form>
     </main>

@@ -12,6 +12,7 @@ export default function ManagePostsPage() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null | undefined>(undefined);
   const [posts, setPosts] = useState<PostRow[] | null>(null);
+  const [deletingSlug, setDeletingSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) {
@@ -37,6 +38,23 @@ export default function ManagePostsPage() {
       .order("date", { ascending: false })
       .then(({ data }) => setPosts(data ?? []));
   }, [session]);
+
+  async function handleDelete(slug: string) {
+    if (!supabase) return;
+    if (!window.confirm("Delete this post? This can't be undone.")) return;
+
+    setDeletingSlug(slug);
+    const { error } = await supabase.from("posts").delete().eq("slug", slug);
+    setDeletingSlug(null);
+
+    if (error) {
+      window.alert("Something went wrong deleting that post — try again in a moment.");
+      return;
+    }
+
+    setPosts((current) => current?.filter((post) => post.slug !== slug) ?? current);
+    router.refresh();
+  }
 
   if (!isSupabaseConfigured) {
     return (
@@ -71,6 +89,14 @@ export default function ManagePostsPage() {
             <div className="post-meta">
               <time dateTime={post.date}>{post.date}</time>
               {post.draft && <span className="draft-badge">draft</span>}
+              <button
+                type="button"
+                className="delete-link"
+                onClick={() => handleDelete(post.slug)}
+                disabled={deletingSlug === post.slug}
+              >
+                {deletingSlug === post.slug ? "Deleting..." : "Delete"}
+              </button>
             </div>
           </article>
         ))}

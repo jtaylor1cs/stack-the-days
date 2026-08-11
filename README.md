@@ -40,10 +40,11 @@ Posts live in a Supabase table now (`slug`, `title`, `date`, `excerpt`,
 `tags`, `draft`, `content`), not markdown files — this is what makes writing
 from the browser possible on the live site, not just locally.
 
-To edit a post later: "My posts" in the nav (while logged in) lists
-everything, including drafts, and links to an edit form for each — or use
-the "Edit" link that appears on a published post's own page. The slug
-(and so the URL) never changes on edit, so links and comments stay intact.
+To edit or delete a post later: "My posts" in the nav (while logged in)
+lists everything, including drafts, with a Delete button on each row and a
+link to an edit form — which also has its own Delete button. The slug (and
+so the URL) never changes on edit, so links and comments stay intact.
+Deleting asks for confirmation and can't be undone.
 
 ---
 
@@ -171,6 +172,3 @@ build time is the lever.
 optimized image pipeline yet — add `next/image` when posts start including
 photos or gear shots.
 
-**6. No delete UI for posts.** You can add (`/new`) and edit (`/manage`,
-or the "Edit" link on a published post while logged in), but removing a
-post still happens by hand in the Supabase table editor.
