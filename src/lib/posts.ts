@@ -1,14 +1,10 @@
-import fs from "node:fs";
-import path from "node:path";
-import matter from "gray-matter";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeHighlight from "rehype-highlight";
 import rehypeStringify from "rehype-stringify";
 import readingTime from "reading-time";
-
-const POSTS_DIR = path.join(process.cwd(), "content", "posts");
+import { supabase } from "./supabaseClient";
 
 export type PostMeta = {
   slug: string;
@@ -24,59 +20,65 @@ export type Post = PostMeta & {
   html: string;
 };
 
-function readPostFile(filename: string): { slug: string; raw: matter.GrayMatterFile<string> } {
-  const slug = filename.replace(/\.md$/, "");
-  const fullPath = path.join(POSTS_DIR, filename);
-  const raw = matter(fs.readFileSync(fullPath, "utf8"));
-  return { slug, raw };
-}
+type PostRow = {
+  slug: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  tags: string[];
+  draft: boolean;
+  content: string;
+};
 
-function toMeta(slug: string, raw: matter.GrayMatterFile<string>): PostMeta {
-  const data = raw.data as Record<string, unknown>;
+function rowToMeta(row: PostRow): PostMeta {
   return {
-    slug,
-    title: String(data.title ?? slug),
-    date: String(data.date ?? ""),
-    excerpt: String(data.excerpt ?? ""),
-    tags: Array.isArray(data.tags) ? data.tags.map(String) : [],
-    draft: Boolean(data.draft ?? false),
-    readingTime: readingTime(raw.content).text,
+    slug: row.slug,
+    title: row.title,
+    date: row.date,
+    excerpt: row.excerpt ?? "",
+    tags: row.tags ?? [],
+    draft: row.draft,
+    readingTime: readingTime(row.content).text,
   };
 }
 
-export function getAllPosts(): PostMeta[] {
-  if (!fs.existsSync(POSTS_DIR)) return [];
-  const files = fs.readdirSync(POSTS_DIR).filter((f) => f.endsWith(".md"));
-  const posts = files.map((filename) => {
-    const { slug, raw } = readPostFile(filename);
-    return toMeta(slug, raw);
-  });
+export async function getAllPosts(): Promise<PostMeta[]> {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug, title, date, excerpt, tags, draft, content")
+    .order("date", { ascending: false })
+    .order("created_at", { ascending: false });
 
-  const visible = posts.filter((p) => !p.draft || process.env.NODE_ENV !== "production");
-  return visible.sort((a, b) => (a.date < b.date ? 1 : -1));
+  if (error || !data) return [];
+  return data.map(rowToMeta);
 }
 
-export function getAllTags(): string[] {
+export async function getAllTags(): Promise<string[]> {
   const tags = new Set<string>();
-  for (const post of getAllPosts()) {
+  for (const post of await getAllPosts()) {
     for (const tag of post.tags) tags.add(tag);
   }
   return [...tags].sort();
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const fullPath = path.join(POSTS_DIR, `${slug}.md`);
-  if (!fs.existsSync(fullPath)) return null;
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("posts")
+    .select("slug, title, date, excerpt, tags, draft, content")
+    .eq("slug", slug)
+    .maybeSingle();
 
-  const raw = matter(fs.readFileSync(fullPath, "utf8"));
-  const meta = toMeta(slug, raw);
+  if (error || !data) return null;
 
+  const meta = rowToMeta(data);
   const processed = await remark()
     .use(remarkGfm)
     .use(remarkRehype)
     .use(rehypeHighlight)
     .use(rehypeStringify)
-    .process(raw.content);
+    .process(data.content);
 
   return { ...meta, html: processed.toString() };
 }

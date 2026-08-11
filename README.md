@@ -16,37 +16,49 @@ npm install
 npm run dev
 ```
 
-Opens at `http://localhost:3000`. Comments will show a "needs Supabase"
-message until you set up the env vars below — everything else works without
-it.
+Opens at `http://localhost:3000`. Posts and comments both need Supabase set
+up (below) — until then you'll see empty/"needs Supabase" states.
 
 Other scripts: `npm run build`, `npm run typecheck`.
 
 ---
 
-## Writing a post every day
+## Writing a post
 
-```bash
-npm run new -- "Day 1: open strings and blisters"
-```
+1. Log in at `/login` with the admin email/password (see setup below).
+2. "Add post" appears in the nav — click it.
+3. Fill in title, an optional excerpt, comma-separated tags (defaults to
+   `ultralearning, guitar`), and the body in plain markdown. "Save as draft"
+   is checked by default.
+4. Submit. If you left it as a draft, it's saved but not public yet — flip
+   `draft` to `false` on the row in the Supabase table editor when you're
+   ready to publish (there's no publish button yet, see "gaps" below). If
+   you unchecked draft before saving, it's live immediately — no redeploy
+   needed, even on the deployed site.
 
-This creates `content/posts/YYYY-MM-DD-slug.md` from `content/_template.md`,
-pre-filled with today's date and the title you gave it. The template keeps
-every entry the same shape (what I practiced, how long, what clicked, what
-didn't, tomorrow's focus) so a year of posts stays scannable.
+Posts live in a Supabase table now (`slug`, `title`, `date`, `excerpt`,
+`tags`, `draft`, `content`), not markdown files — this is what makes writing
+from the browser possible on the live site, not just locally.
 
-Frontmatter fields:
+---
 
-| Field     | Meaning                                            |
-| --------- | --------------------------------------------------- |
-| `title`   | Post title                                          |
-| `date`    | `YYYY-MM-DD`, used for sorting and display           |
-| `excerpt` | One-liner shown on the home page and in RSS          |
-| `tags`    | e.g. `["ultralearning", "guitar"]` — powers `/tags/*` |
-| `draft`   | `true` hides it in production; set `false` to publish |
+## Setting up posts (Supabase)
 
-Posts are plain markdown files, so they're just git history — no CMS, no
-database migration, no lock-in.
+1. In the same Supabase project used for comments, open the SQL editor,
+   paste in `supabase/posts_schema.sql`, and run it. This creates the
+   `posts` table: anyone can read published posts, only the one admin
+   account (matched by email) can create/edit/delete posts or read drafts.
+2. Create that admin account: Authentication → Users → Add user → your
+   email, set a password, check "Auto Confirm User".
+3. Disable public sign-ups: Authentication → Settings → turn off "Allow new
+   users to sign up" — this is what keeps the admin check in
+   `posts_schema.sql` airtight, since nobody else can get an account at all.
+4. One-time only: the repo's original posts still live in
+   `content/posts/*.md`. To move them into the table, temporarily add
+   `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` (Project
+   Settings → API → `service_role` secret), run `npm run migrate-posts`,
+   then remove those two lines from `.env.local` again — the app itself
+   never needs the service role key, only the one-time import script does.
 
 ---
 
@@ -100,30 +112,33 @@ rebuilt when you're ready:
 ```
 stack-the-days/
 ├── content/
-│   ├── posts/*.md              one file per post
-│   └── _template.md            daily-entry template used by `npm run new`
-├── scripts/new-post.mjs        scaffolds today's post
-├── supabase/schema.sql         comments table + RLS policies — read before you touch Supabase
+│   └── posts/*.md               historical posts — source for the one-time migration only
+├── scripts/migrate-posts.mjs    one-time import of content/posts/*.md into Supabase
+├── supabase/
+│   ├── schema.sql                comments table + RLS policies
+│   └── posts_schema.sql          posts table + RLS policies — read before you touch Supabase
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx, globals.css   retro design system (warm paper + rust/mustard/olive)
 │   │   ├── page.tsx                  home: post list, newest first
 │   │   ├── posts/[slug]/page.tsx     post detail + comments
 │   │   ├── tags/[tag]/page.tsx       posts filtered by tag
+│   │   ├── login/page.tsx            admin sign-in
+│   │   ├── new/page.tsx              add-post editor (logged-in only)
 │   │   ├── rss.xml/route.ts, sitemap.ts
 │   ├── components/
-│   │   ├── PostCard.tsx, AdSlot.tsx
+│   │   ├── PostCard.tsx, AdSlot.tsx, AuthStatus.tsx
 │   │   └── CommentSection.tsx, CommentForm.tsx
 │   └── lib/
-│       ├── posts.ts            fs + gray-matter + remark → HTML
+│       ├── posts.ts            Supabase queries + remark → HTML
 │       ├── supabaseClient.ts
 │       └── format.ts
 ```
 
-**Stack:** Next.js 14 (App Router) + TypeScript, markdown posts via
-`gray-matter`/`remark`, Supabase for comments. Hand-rolled CSS, no framework —
-same approach as the sibling Meritrail project, keeps the retro look fully
-under your control.
+**Stack:** Next.js 14 (App Router) + TypeScript, posts and comments both in
+Supabase (Postgres + RLS + Auth), markdown-to-HTML via `remark`. Hand-rolled
+CSS, no framework — same approach as the sibling Meritrail project, keeps
+the retro look fully under your control.
 
 ---
 
@@ -148,3 +163,8 @@ build time is the lever.
 **5. No image handling beyond whatever markdown/relative paths you use.** No
 optimized image pipeline yet — add `next/image` when posts start including
 photos or gear shots.
+
+**6. No edit/publish UI for posts.** `/new` only inserts — flipping a draft
+to published, fixing a typo, or deleting a post all happen by hand in the
+Supabase table editor for now, same as comment moderation. A `/posts/[slug]/edit`
+page is the natural next step.

@@ -1,16 +1,14 @@
-import { getAllPosts, getAllTags } from "@/lib/posts";
+import { getAllPosts } from "@/lib/posts";
 import { PostCard } from "@/components/PostCard";
 
-export function generateStaticParams() {
-  return getAllTags().map((tag) => ({ tag }));
-}
+export const dynamic = "force-dynamic";
 
 export function generateMetadata({ params }: { params: { tag: string } }) {
   return { title: `#${params.tag} — Stack the Days` };
 }
 
-export default function TagPage({ params }: { params: { tag: string } }) {
-  const posts = getAllPosts().filter((post) => post.tags.includes(params.tag));
+export default async function TagPage({ params }: { params: { tag: string } }) {
+  const posts = (await getAllPosts()).filter((post) => post.tags.includes(params.tag));
 
   return (
     <main>

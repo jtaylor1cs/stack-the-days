@@ -1,13 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getAllPosts, getPostBySlug } from "@/lib/posts";
+import { getPostBySlug } from "@/lib/posts";
 import { formatDate } from "@/lib/format";
 import { AdSlot } from "@/components/AdSlot";
 import { CommentSection } from "@/components/CommentSection";
 
-export function generateStaticParams() {
-  return getAllPosts().map((post) => ({ slug: post.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const post = await getPostBySlug(params.slug);

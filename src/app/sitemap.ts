@@ -3,8 +3,10 @@ import { getAllPosts } from "@/lib/posts";
 
 const SITE_URL = "https://stackthedays.example.com";
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const posts = getAllPosts().map((post) => ({
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const posts = (await getAllPosts()).map((post) => ({
     url: `${SITE_URL}/posts/${post.slug}`,
     lastModified: post.date,
   }));
