@@ -40,6 +40,11 @@ Posts live in a Supabase table now (`slug`, `title`, `date`, `excerpt`,
 `tags`, `draft`, `content`), not markdown files — this is what makes writing
 from the browser possible on the live site, not just locally.
 
+To edit a post later: "My posts" in the nav (while logged in) lists
+everything, including drafts, and links to an edit form for each — or use
+the "Edit" link that appears on a published post's own page. The slug
+(and so the URL) never changes on edit, so links and comments stay intact.
+
 ---
 
 ## Setting up posts (Supabase)
@@ -125,9 +130,11 @@ stack-the-days/
 │   │   ├── tags/[tag]/page.tsx       posts filtered by tag
 │   │   ├── login/page.tsx            admin sign-in
 │   │   ├── new/page.tsx              add-post editor (logged-in only)
+│   │   ├── manage/page.tsx           list of all posts incl. drafts (logged-in only)
+│   │   ├── posts/[slug]/edit/page.tsx  edit an existing post (logged-in only)
 │   │   ├── rss.xml/route.ts, sitemap.ts
 │   ├── components/
-│   │   ├── PostCard.tsx, AdSlot.tsx, AuthStatus.tsx
+│   │   ├── PostCard.tsx, AdSlot.tsx, AuthStatus.tsx, EditPostLink.tsx
 │   │   └── CommentSection.tsx, CommentForm.tsx
 │   └── lib/
 │       ├── posts.ts            Supabase queries + remark → HTML
@@ -164,7 +171,6 @@ build time is the lever.
 optimized image pipeline yet — add `next/image` when posts start including
 photos or gear shots.
 
-**6. No edit/publish UI for posts.** `/new` only inserts — flipping a draft
-to published, fixing a typo, or deleting a post all happen by hand in the
-Supabase table editor for now, same as comment moderation. A `/posts/[slug]/edit`
-page is the natural next step.
+**6. No delete UI for posts.** You can add (`/new`) and edit (`/manage`,
+or the "Edit" link on a published post while logged in), but removing a
+post still happens by hand in the Supabase table editor.

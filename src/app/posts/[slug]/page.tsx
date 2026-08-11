@@ -4,6 +4,7 @@ import { getPostBySlug } from "@/lib/posts";
 import { formatDate } from "@/lib/format";
 import { AdSlot } from "@/components/AdSlot";
 import { CommentSection } from "@/components/CommentSection";
+import { EditPostLink } from "@/components/EditPostLink";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function PostPage({ params }: { params: { slug: string } })
             <span>{post.readingTime}</span>
           </div>
           <h1 className="post-title">{post.title}</h1>
+          <EditPostLink slug={post.slug} />
           {post.tags.length > 0 && (
             <div className="tag-list">
               {post.tags.map((tag) => (

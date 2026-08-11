@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 
-export function AuthStatus() {
+export function EditPostLink({ slug }: { slug: string }) {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
 
   useEffect(() => {
@@ -13,29 +13,18 @@ export function AuthStatus() {
       setSession(null);
       return;
     }
-
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
-
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
     });
-
     return () => subscription.subscription.unsubscribe();
   }, []);
 
-  if (!isSupabaseConfigured || session === undefined) return null;
-
-  if (!session) {
-    return <Link href="/login">Log in</Link>;
-  }
+  if (!isSupabaseConfigured || !session) return null;
 
   return (
-    <>
-      <Link href="/new">Add post</Link>
-      <Link href="/manage">My posts</Link>
-      <button type="button" onClick={() => supabase?.auth.signOut()}>
-        Log out
-      </button>
-    </>
+    <Link href={`/posts/${slug}/edit`} className="edit-link">
+      Edit
+    </Link>
   );
 }
