@@ -417,6 +417,50 @@ h4 {
   cursor: not-allowed;
 }
 
+.formatting-help {
+  max-width: 32rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(43, 33, 24, 0.2);
+  border-radius: 4px;
+  background: var(--cream-dark);
+  font-size: 0.85rem;
+}
+
+.formatting-help summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.formatting-help table {
+  margin-top: 0.75rem;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.formatting-help td {
+  padding: 0.3rem 0.5rem 0.3rem 0;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(43, 33, 24, 0.1);
+}
+
+.formatting-help td:first-child {
+  color: var(--olive);
+  white-space: nowrap;
+}
+
+.formatting-help code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+}
+
+.formatting-help p {
+  margin: 0.75rem 0 0;
+  color: var(--olive);
+}
+
 .site-footer {
   margin-top: 4rem;
   padding-top: 1.5rem;

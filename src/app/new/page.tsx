@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
+import { FormattingHelp } from "@/components/FormattingHelp";
 
 const BODY_PLACEHOLDER = `What I practiced today (be specific — song, technique, drill)
 
@@ -129,6 +130,7 @@ export default function NewPostPage() {
           <input type="checkbox" checked={draft} onChange={(e) => setDraft(e.target.checked)} />
           Save as draft
         </label>
+        <FormattingHelp />
         <textarea
           className="post-body-input"
           placeholder={BODY_PLACEHOLDER}

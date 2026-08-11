@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
+import { FormattingHelp } from "@/components/FormattingHelp";
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -159,6 +160,7 @@ export default function EditPostPage() {
           <input type="checkbox" checked={draft} onChange={(e) => setDraft(e.target.checked)} />
           Save as draft
         </label>
+        <FormattingHelp />
         <textarea
           className="post-body-input"
           value={content}
