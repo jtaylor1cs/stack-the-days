@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Stack the Days",
-  description: "Striving to learn more and track my progress in all aspects of life: Basketball, Guitar, AI/Machine Learning, Stocks. Trying to get the most out of everyday I have.",
+  description: "Striving to learn more and track my progress in all aspects of life. Trying to get the most out of everyday I have.",
   metadataBase: new URL("https://stackthedays.example.com"),
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Link href="/" className="site-title">
                 Stack the Days
               </Link>
-              <div className="site-tagline">Striving to learn more and track my progress in all aspects of life: Basketball, Guitar, AI/Machine Learning, Stocks. Trying to get the most out of everyday I have.</div>
+              <div className="site-tagline">Striving to learn more and track my progress in all aspects of life. Trying to get the most out of everyday I have.</div>
             </div>
             <nav className="site-nav">
               <Link href="/">Home</Link>
