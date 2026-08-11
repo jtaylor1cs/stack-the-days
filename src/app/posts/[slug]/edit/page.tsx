@@ -15,6 +15,7 @@ export default function EditPostPage() {
   const [notFound, setNotFound] = useState(false);
 
   const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [tags, setTags] = useState("");
   const [draft, setDraft] = useState(true);
@@ -41,7 +42,7 @@ export default function EditPostPage() {
     if (!supabase || !session) return;
     supabase
       .from("posts")
-      .select("title, excerpt, tags, draft, content")
+      .select("title, date, excerpt, tags, draft, content")
       .eq("slug", slug)
       .maybeSingle()
       .then(({ data }) => {
@@ -50,6 +51,7 @@ export default function EditPostPage() {
           return;
         }
         setTitle(data.title);
+        setDate(data.date);
         setExcerpt(data.excerpt ?? "");
         setTags((data.tags ?? []).join(", "));
         setDraft(data.draft);
@@ -63,7 +65,7 @@ export default function EditPostPage() {
     if (!supabase) return;
 
     const trimmedTitle = title.trim();
-    if (!trimmedTitle || !content.trim()) return;
+    if (!trimmedTitle || !date || !content.trim()) return;
 
     const tagList = tags
       .split(",")
@@ -75,6 +77,7 @@ export default function EditPostPage() {
       .from("posts")
       .update({
         title: trimmedTitle,
+        date,
         excerpt: excerpt.trim(),
         tags: tagList,
         draft,
@@ -137,6 +140,7 @@ export default function EditPostPage() {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
         <input
           type="text"
           placeholder="Excerpt (optional)"
